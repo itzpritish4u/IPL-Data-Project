@@ -5,36 +5,33 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
 
-const matchesPath = join(__dirname, '../data/matches.csv');
+const matchesPath = join(__dirname, '../data/matches.json');
 const outputPath = join(__dirname, '../public/output/matchesWonPerTeamPerYear.json');
 
 function getMatchesWonPerTeamPerYear(matches) {
-  const matchesWonPerTeamPerYear = {};
-    
-  for (let i = 1; i < matches.length; ++i) {
-    const match = matches[i].split(',');
-    const matchYear = match[1];
-    const winner = match[10];
+    const matchesWonPerTeamPerYear = {};
+    matches.forEach(match => {
+        const season = match.season;
+        const winner = match.winner;
 
-    if (winner && winner !== '') {
-            if (!matchesWonPerTeamPerYear[matchYear]) {
-                matchesWonPerTeamPerYear[matchYear] = {};
+        if (winner && winner !== '') {
+            if (!matchesWonPerTeamPerYear[season]) {
+                matchesWonPerTeamPerYear[season] = {};
             }
-            if (matchesWonPerTeamPerYear[matchYear][winner]) {
-                matchesWonPerTeamPerYear[matchYear][winner]++;
-            } else {
-                matchesWonPerTeamPerYear[matchYear][winner] = 1;
+            if (!matchesWonPerTeamPerYear[season][winner]) {
+                matchesWonPerTeamPerYear[season][winner] = 0;
             }
+            matchesWonPerTeamPerYear[season][winner]++;
         }
-    }
-
+    });
     return matchesWonPerTeamPerYear;
 }
 
 function main() {
-    const matches = readFileSync(matchesPath, 'utf-8').split('\n');
+    const matches = JSON.parse(readFileSync(matchesPath, 'utf-8'));
     const matchesWonPerTeamPerYear = getMatchesWonPerTeamPerYear(matches);
     writeFileSync(outputPath, JSON.stringify(matchesWonPerTeamPerYear, null, 2), 'utf-8');
+    console.log('matchesWonPerTeamPerYear.json has been created successfully.');
 }
 
 main();
